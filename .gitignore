@@ -21,3 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+.idea/
+font-in-thumbnail-poc-232de2416d27.json
