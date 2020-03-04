@@ -31,7 +31,7 @@ export class App extends React.PureComponent {
         const annotations = this.state.data.textAnnotations.map(dataRow => (
             <div key={'text-annotation-' + i++} className={'element'}>
                 <strong>Text: {dataRow.description}</strong><br/>
-                Locale: {dataRow.locale}<br/>
+                Locale: {dataRow.locale || 'not included'}<br/>
                 Confidence: {dataRow.confidence}<br/>
                 Vertices:<br/>
                 <div className={'element__vertices'}>
@@ -40,6 +40,7 @@ export class App extends React.PureComponent {
                     2: (x: {dataRow.boundingPoly.vertices[2].x}, y: {dataRow.boundingPoly.vertices[2].y})<br/>
                     3: (x: {dataRow.boundingPoly.vertices[3].x}, y: {dataRow.boundingPoly.vertices[3].y})
                 </div>
+                <strong>Pixel size: {dataRow.boundingPoly.vertices[2].y - dataRow.boundingPoly.vertices[0].y}px</strong>
             </div>
         ));
         return (
@@ -66,8 +67,6 @@ export class App extends React.PureComponent {
         let i = 1;
         const colors = this.state.data.dominantColors.colors
             .sort((first, second) => {
-                console.log('first', first);
-                console.log('second', second);
                 if (second.pixelFraction < first.pixelFraction) {
                     return -1;
                 }
