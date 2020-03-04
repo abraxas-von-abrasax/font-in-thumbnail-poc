@@ -7,13 +7,20 @@ import axios from 'axios'
 export class App extends React.PureComponent {
     state = {
         data: null,
+        image: null
     };
 
     getFullPageAnnotation = () => {
         if (!this.state.data.fullTextAnnotation) {
             return null;
         }
-        return <h2>Look into the developer tools' console to see the full page annotation.</h2>
+        console.log('_FULL_PAGE_ANNOTATION_', this.state.data.fullTextAnnotation);
+        return (
+            <>
+                <h2>Full Text Annotation</h2>
+                <p>Look into the developer tools' console to see the full page annotation.</p>
+            </>
+        );
     };
 
     getTextAnnotations = () => {
@@ -47,20 +54,44 @@ export class App extends React.PureComponent {
         if (!this.state.data.dominantColors) {
             return null;
         }
+
+        function rgbToHex(rgb) {
+            const hex = Number(rgb).toString(16);
+            if (hex.length < 2) {
+                return '0' + hex;
+            }
+            return hex;
+        }
+
         let i = 1;
-        return this.state.data.dominantColors.colors.map(color => {
-            const c = `rgb(${color.color.red}, ${color.color.green}, ${color.color.blue})`;
-            return (
-                <div key={'dominant-colors-' + i++} className={'color--wrapper'}>
-                    <h2>Dominant Colors</h2>
-                    <div className={'color__div'} style={{ backgroundColor: c }}/>
-                    <div className={'color__info'}>
-                        Score: {color.score.toFixed(4)}<br/>
-                        Pixel Fraction: {color.pixelFraction.toFixed(4)}
+        const colors = this.state.data.dominantColors.colors
+            .sort((first, second) => {
+                console.log('first', first);
+                console.log('second', second);
+                if (second.pixelFraction < first.pixelFraction) {
+                    return -1;
+                }
+                return 1;
+            })
+            .map(color => {
+                const c = `rgb(${color.color.red}, ${color.color.green}, ${color.color.blue})`;
+                return (
+                    <div key={'dominant-colors-' + i++} className={'color--wrapper'}>
+                        <div className={'color__div'} style={{ backgroundColor: c }}/>
+                        <div className={'color__info'}>
+                            Color: #{rgbToHex(color.color.red)}{rgbToHex(color.color.green)}{rgbToHex(color.color.blue)}<br/>
+                            Score: {color.score.toFixed(4)}<br/>
+                            Pixel Fraction: {color.pixelFraction.toFixed(4)}
+                        </div>
                     </div>
-                </div>
-            );
-        });
+                );
+            });
+        return (
+            <>
+                <h2>Dominant Colors</h2>
+                {colors}
+            </>
+        );
     };
 
     getData = () => {
@@ -86,12 +117,25 @@ export class App extends React.PureComponent {
         reader.onloadend = () => {
             axios.post(config.backend.url, { image: encodeURIComponent(reader.result.toString()) })
                 .then(response => {
-                    console.log('_GOT_DATA_', response.data);
-                    this.setState({ data: response.data })
+                    this.setState({ data: response.data, image: reader.result.toString() });
                 }).catch(error => {
-                console.log('_got_error', error);
+                console.log('Error:', error);
             });
         };
+    };
+
+    getImage = () => {
+        if (!this.state.image) {
+            return null;
+        }
+        const type = this.state.image.toString().search('jpeg') === -1 ? 'png' : 'jpeg';
+        const image = this.state.image.toString().replace(`data:image/${type};base64,`, '');
+        return (
+            <div className={'image'}>
+                <h2>Uploaded image</h2>
+                <img src={`data:image/jpeg;base64,${image}`} alt={'Uploaded'}/>
+            </div>
+        );
     };
 
     render() {
@@ -112,6 +156,7 @@ export class App extends React.PureComponent {
                     </button>
                 </FilePicker>
                 {data}
+                {this.getImage()}
             </main>
         );
     }
