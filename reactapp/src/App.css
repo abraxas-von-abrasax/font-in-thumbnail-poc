@@ -1,0 +1,32 @@
+main {
+    margin: 1em;
+}
+
+.image-picker {
+    margin-bottom: 1em;
+}
+
+.element {
+    display: inline-flex;
+    flex-direction: column;
+    margin: 1em;
+    padding: 1.5em;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+}
+
+.element__vertices {
+    display: flex;
+    flex-direction: column;
+    margin-left: 2em;
+}
+
+.color--wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    margin: 1em;
+}
+
+.color__div {
+    height: 200px;
+    width: 100%;
+}
