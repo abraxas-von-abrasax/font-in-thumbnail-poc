@@ -1,3 +1,25 @@
 main {
     margin: 1em;
 }
+
+.loading {
+    display: flex;
+    justify-content: center;
+    margin-top: 4em;
+}
+
+.data-set {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 4em;
+}
+
+.data-set__element:not(:last-child) {
+    margin-right: 1em;
+}
+
+.data-set__element:hover {
+    color: #565656;
+    cursor: pointer;
+}

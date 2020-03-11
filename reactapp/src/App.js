@@ -9,47 +9,103 @@ import { FullPageAnnotationsResult } from './components/full-page-annotations-re
 
 export class App extends React.PureComponent {
     state = {
-        data: null,
+        loading: false,
+        dataSet: null,
+        currentData: null,
         image: null
+    };
+
+    changeData = resolution => {
+        this.setState({
+            currentData: this.state.dataSet[resolution],
+            image: this.state.dataSet[resolution].imageUrl
+        })
+    };
+
+    getDataSet = () => {
+        if (!this.state.dataSet || this.state.dataSet === {}) {
+            return null;
+        }
+
+        const dataSetElements = Object.keys(this.state.dataSet).map(resolution => {
+            return (
+                <span key={resolution} className={'data-set__element'} onClick={() => this.changeData(resolution)}>
+                    {resolution}
+                </span>
+            );
+        });
+        return (
+            <div className={'data-set'}>
+                <h2>Thumbnail Sizes</h2>
+                <div>
+                    {dataSetElements}
+                </div>
+            </div>
+        );
     };
 
     getData = () => {
         if (
-            !this.state.data.fullTextAnnotation &&
-            (!this.state.data.textAnnotations || !this.state.data.textAnnotations.length) &&
-            !this.state.data.dominantColors
+            !this.state.currentData.fullTextAnnotation &&
+            (!this.state.currentData.textAnnotations || !this.state.currentData.textAnnotations.length) &&
+            !this.state.currentData.dominantColors
         ) {
             return <div>Visions API did not return any data for this image.</div>
         }
         return (
             <div>
-                <FullPageAnnotationsResult fullTextAnnotation={this.state.data.fullTextAnnotation}/>
-                <DominantColorsResult dominantColors={this.state.data.dominantColors}/>
-                <TextAnnotationsResult textAnnotations={this.state.data.textAnnotations}/>
+                <FullPageAnnotationsResult fullTextAnnotation={this.state.currentData.fullTextAnnotation}/>
+                <DominantColorsResult dominantColors={this.state.currentData.dominantColors}/>
+                <TextAnnotationsResult textAnnotations={this.state.currentData.textAnnotations}/>
             </div>
         );
     };
 
     processFile = file => {
+        this.setState({ loading: true });
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onloadend = () => {
             axios.post(config.backend.url, { image: encodeURIComponent(reader.result.toString()) })
                 .then(response => {
-                    this.setState({ data: response.data, image: reader.result.toString() });
+                    this.setState({
+                        loading: false,
+                        dataSet: null,
+                        currentData: response.data,
+                        image: reader.result.toString()
+                    });
                 }).catch(error => {
                 console.error('Error:', error);
+                this.setState({
+                    loading: false,
+                    dataSet: null,
+                    currentData: null,
+                    image: null
+                })
             });
         };
     };
 
     processUrl = url => {
+        this.setState({ loading: true });
         axios.get(`${config.backend.url}/url/${encodeURIComponent(url)}`)
             .then(response => {
-                this.setState({ data: response.data, image: response.data.imageUrl });
+                this.setState({
+                    loading: false,
+                    dataSet: response.data,
+                    currentData: response.data.default,
+                    image: response.data.imageUrl
+                });
             })
             .catch(error => {
                 console.error('Error:', error);
+                this.setState({
+                    loading: false,
+                    dataSet: null,
+                    currentData: null,
+                    image: null
+                })
+
             });
     };
 
@@ -76,16 +132,34 @@ export class App extends React.PureComponent {
     };
 
     render() {
-        let data = null;
-        if (this.state.data) {
-            data = this.getData();
+        let dataSet = null;
+
+        if (this.state.dataSet) {
+            dataSet = this.getDataSet();
         }
+
+        let content = <div className={'loading'}>Loading...</div>;
+
+        if (!this.state.loading) {
+            let data = null;
+            if (this.state.currentData) {
+                data = this.getData();
+            }
+
+            content = (
+                <>
+                    {dataSet}
+                    {data}
+                    {this.getImage()}
+                </>
+            );
+        }
+
         return (
             <main>
                 <h1>Image Analyzer</h1>
                 <DataInput onFileSubmit={this.processFile} onUrlSubmit={this.processUrl}/>
-                {data}
-                {this.getImage()}
+                {content}
             </main>
         );
     }

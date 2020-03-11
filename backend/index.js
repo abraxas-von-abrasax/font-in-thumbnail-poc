@@ -23,8 +23,12 @@ app.get('/api/url/:url', async (request, response) => {
         return response.status(404).send(`Cannot find YouTube video for URL ${request.params.url}`);
     }
 
-    const result = await analyzeImage(youtubeVideo['thumbnails'].default.url, true);
-    result.imageUrl = youtubeVideo['thumbnails'].default.url;
+    const result = {};
+    for (const resolution of Object.keys(youtubeVideo['thumbnails'])) {
+        const visionResult = await analyzeImage(youtubeVideo['thumbnails'][resolution].url, true);
+        visionResult.imageUrl = youtubeVideo['thumbnails'][resolution].url;
+        result[resolution] = visionResult;
+    }
     return response.status(200).send(result);
 });
 
