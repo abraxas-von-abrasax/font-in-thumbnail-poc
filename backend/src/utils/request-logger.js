@@ -1,7 +1,7 @@
 const config = require('./config');
 
-module.exports = function(req, res, next) {
+module.exports = async function(req, res, next) {
     console.log(`ENTER ${config.baseUrl}${req.url}`);
-    next();
+    await next();
     console.log(`LEAVE ${res.statusCode} - ${config.baseUrl}${req.url}`);
 };

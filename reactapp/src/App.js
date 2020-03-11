@@ -12,7 +12,8 @@ export class App extends React.PureComponent {
         loading: false,
         dataSet: null,
         currentData: null,
-        image: null
+        image: null,
+        smallestPixelSize: null
     };
 
     changeData = resolution => {
@@ -44,6 +45,37 @@ export class App extends React.PureComponent {
         );
     };
 
+    getSmallestPixelSize = () => {
+        if (this.state.smallestPixelSize === null) {
+            return null;
+        }
+
+        let result;
+
+        if (+this.state.smallestPixelSize === 0) {
+            result = <p>Your thumbnail does not seem to feature text.</p>;
+        } else if (+this.state.smallestPixelSize < 16) {
+            result = (
+                <p>
+                    Your thumbnail overlay-text may not be legible. The smallest part is only&nbsp;
+                    {this.state.smallestPixelSize}px big.
+                </p>
+            );
+        } else {
+            result = <p>Great! Your thumbnail overlay-text is well legible.</p>;
+        }
+        return (
+            <div className={'analysis-results'}>
+                <h2>Analysis Results</h2>
+                <div>{result}</div>
+            </div>
+        );
+    };
+
+    updateSmallestPixelSize = px => {
+        this.setState({ smallestPixelSize: px || 0 });
+    };
+
     getData = () => {
         if (
             !this.state.currentData.fullTextAnnotation &&
@@ -54,15 +86,25 @@ export class App extends React.PureComponent {
         }
         return (
             <div>
+                {this.getSmallestPixelSize()}
                 <FullPageAnnotationsResult fullTextAnnotation={this.state.currentData.fullTextAnnotation}/>
                 <DominantColorsResult dominantColors={this.state.currentData.dominantColors}/>
-                <TextAnnotationsResult textAnnotations={this.state.currentData.textAnnotations}/>
+                <TextAnnotationsResult
+                    textAnnotations={this.state.currentData.textAnnotations}
+                    onGotSmallestFontSize={this.updateSmallestPixelSize}
+                />
             </div>
         );
     };
 
     processFile = file => {
-        this.setState({ loading: true });
+        this.setState({
+            loading: true,
+            dataSet: null,
+            currentData: null,
+            image: null,
+            smallestPixelSize: null
+        });
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onloadend = () => {
@@ -87,14 +129,20 @@ export class App extends React.PureComponent {
     };
 
     processUrl = url => {
-        this.setState({ loading: true });
+        this.setState({
+            loading: true,
+            dataSet: null,
+            currentData: null,
+            image: null,
+            smallestPixelSize: null
+        });
         axios.get(`${config.backend.url}/url/${encodeURIComponent(url)}`)
             .then(response => {
                 this.setState({
                     loading: false,
                     dataSet: response.data,
                     currentData: response.data.default,
-                    image: response.data.imageUrl
+                    image: response.data.default.imageUrl
                 });
             })
             .catch(error => {
