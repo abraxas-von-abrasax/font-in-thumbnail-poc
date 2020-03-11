@@ -1,0 +1,47 @@
+.input--wrapper {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 65%;
+    margin: 0 auto;
+}
+
+.input--wrapper > div {
+    margin: 2em;
+}
+
+.input__file {
+    width: 220px;
+}
+
+.input__file > div {
+    height: 100%;
+    width: 100%;
+}
+
+.input__file button {
+    height: 100%;
+    width: 100%;
+}
+
+.input__url {
+    width: 220px;
+}
+
+.input__url form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.input__url input {
+    height: 30px;
+    padding: 5px;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.input__url button {
+    width: 100%;
+}

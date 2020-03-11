@@ -1,5 +1,19 @@
-async function quickstart(imageData) {
-    const image = imageData.replace('data:image/jpeg;base64,', '');
+function getImageRequestObject(image, isUrl) {
+    if (!isUrl) {
+        return {
+            content: Buffer.from(image, 'base64')
+        };
+    }
+    return {
+        source: {
+            imageUri: image
+        }
+    };
+}
+
+
+async function analyzeImage(image, isUrl = false) {
+    const imageRequestObject = getImageRequestObject(image, isUrl);
     // Imports the Google Cloud client library
     const vision = require('@google-cloud/vision');
 
@@ -20,9 +34,7 @@ async function quickstart(imageData) {
                 "type": "CROP_HINTS"
             }
         ],
-        image: {
-            content: Buffer.from(image, 'base64')
-        }
+        image: imageRequestObject
     });
     return {
         textAnnotations: result.textAnnotations,
@@ -32,4 +44,4 @@ async function quickstart(imageData) {
     }
 }
 
-module.exports = quickstart;
+module.exports = analyzeImage;

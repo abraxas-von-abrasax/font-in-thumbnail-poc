@@ -1,0 +1,11 @@
+.color--wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    margin: 1em;
+}
+
+.color__div {
+    height: 200px;
+    width: 100%;
+    margin-bottom: 0.5em;
+}
